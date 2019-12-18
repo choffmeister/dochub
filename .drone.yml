@@ -1,0 +1,120 @@
+kind: pipeline
+name: default
+steps:
+  - name: restore-cache-compile
+    image: drillster/drone-volume-cache
+    settings:
+      restore: true
+      mount:
+        - ./.sbt
+        - ./.ivy2
+        - ./web/node_modules
+    volumes:
+      - name: cache
+        path: /cache
+
+  - name: server-compile-sources
+    image: choffmeister/scala-ci:latest
+    commands:
+      - export SBT_OPTS="-Dsbt.global.base=./.sbt -Dsbt.ivy.home=./.ivy2"
+      - sbt test:compile
+
+  - name: web-install-dependencies
+    image: choffmeister/node-ci:latest
+    commands:
+      - cd web
+      - echo //npm.pkg.github.com/:_authToken=$NPM_TOKEN >> .npmrc
+      - yarn install --pure-lockfile
+    environment:
+      NPM_TOKEN:
+        from_secret: choffmeister_github_npm_token
+
+  - name: rebuild-cache-compile
+    image: drillster/drone-volume-cache
+    settings:
+      rebuild: true
+      mount:
+        - ./.sbt
+        - ./.ivy2
+        - ./web/node_modules
+    volumes:
+      - name: cache
+        path: /cache
+    when:
+      branch: master
+      event: push
+
+  - name: server-test
+    image: choffmeister/scala-ci:latest
+    commands:
+      - export SBT_OPTS="-Dsbt.global.base=./.sbt -Dsbt.ivy.home=./.ivy2"
+      - sbt -Ddatabase.db.properties.serverName=postgres test:test
+
+  - name: server-lint
+    image: choffmeister/scala-ci:latest
+    commands:
+      - export SBT_OPTS="-Dsbt.global.base=./.sbt -Dsbt.ivy.home=./.ivy2"
+      - sbt scalafmtCheck test:scalafmtCheck
+
+  - name: server-docs
+    image: choffmeister/scala-ci:latest
+    commands:
+      - export SBT_OPTS="-Dsbt.global.base=./.sbt -Dsbt.ivy.home=./.ivy2"
+      - sbt packageSite
+
+  - name: web-test
+    image: choffmeister/node-ci:latest
+    commands:
+      - cd web
+      - yarn test --coverage
+
+  - name: web-lint
+    image: choffmeister/node-ci:latest
+    commands:
+      - cd web
+      - yarn lint
+
+  - name: web-build
+    image: choffmeister/node-ci:latest
+    commands:
+      - cd web
+      - yarn build
+    when:
+      branch: master
+      event: push
+
+  - name: server-build
+    image: choffmeister/scala-ci:latest
+    commands:
+      - docker login docker.pkg.home.choffmeister.de -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - export SBT_OPTS="-Dsbt.global.base=./.sbt -Dsbt.ivy.home=./.ivy2"
+      - sbt docker:publish
+    environment:
+      DOCKER_USERNAME: api
+      DOCKER_PASSWORD:
+        from_secret: registry_api_key
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      branch: master
+      event: push
+
+volumes:
+  - name: cache
+    host:
+      path: /var/lib/drone/cache
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
+services:
+  - name: postgres
+    image: postgres:11.2
+    command: [
+      "-c", "max_connections=1024"
+    ]
+    environment:
+      POSTGRES_DB: dochub
+      POSTGRES_USER: dochub
+      POSTGRES_PASSWORD: dochub
