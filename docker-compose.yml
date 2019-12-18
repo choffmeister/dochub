@@ -1,0 +1,22 @@
+version: "2"
+
+services:
+  postgres:
+    image: "postgres:11.2"
+    command: [
+      "-c", "max_connections=1024"
+    ]
+    ports:
+    - "5432:5432"
+    environment:
+    - "POSTGRES_DB=dochub"
+    - "POSTGRES_USER=dochub"
+    - "POSTGRES_PASSWORD=dochub"
+  tika:
+    image: "logicalspark/docker-tikaserver"
+    ports:
+      - "50000:9998"
+  ocrmypdf:
+    image: "choffmeister/ocrmypdf-server"
+    ports:
+      - "50001:8080"
