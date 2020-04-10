@@ -1,9 +1,6 @@
 import React from 'react'
 import makeStyles from '@material-ui/core/styles/makeStyles'
-import { useAuth } from '@airfocusio/react-auth-provider'
-import { Principal } from './models/Principal'
 import LayoutView from './views/LayoutView/LayoutView'
-import LoginView from './views/LoginView/LoginView'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { useHttp } from '@airfocusio/react-http-provider'
 import { createDocument } from './models/Document'
@@ -12,7 +9,6 @@ import { useGlobalFileDrop } from './components/useGlobalFileDrop'
 export const App: React.FC = () => {
   useStyles()
   const { http, globalRefresh } = useHttp()
-  const { credentials } = useAuth<Principal>()
 
   useGlobalFileDrop(async (file) => {
     await createDocument(http, file.name, file.type || 'application/octet-stream', file)
@@ -22,7 +18,7 @@ export const App: React.FC = () => {
   return (
     <React.Fragment>
       <CssBaseline />
-      {!!credentials ? <LayoutView /> : <LoginView />}
+      <LayoutView />
     </React.Fragment>
   )
 }

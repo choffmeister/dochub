@@ -10,7 +10,6 @@ import Button from '@material-ui/core/Button'
 import { homeUrl } from './urls'
 
 const HomeView = React.lazy(() => import('../HomeView/HomeView'))
-const ApiKeysView = React.lazy(() => import('../ApiKeysView/ApiKeysView'))
 const DocumentView = React.lazy(() => import('../DocumentView/DocumentView'))
 
 const LayoutView: React.FC = () => {
@@ -30,7 +29,6 @@ const LayoutView: React.FC = () => {
                 exact
                 render={({ match }) => <DocumentView documentId={match.params.documentId} />}
               />
-              <Route path="/settings/api-keys" exact render={() => <ApiKeysView />} />
               <Route
                 render={() => (
                   <MessageView

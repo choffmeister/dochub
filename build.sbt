@@ -1,11 +1,3 @@
-import de.choffmeister.microserviceutils.plugin.MicroserviceUtilsPluginVersion
-
-val akkaVersion = MicroserviceUtilsPluginVersion.akka
-val akkaHttpVersion = MicroserviceUtilsPluginVersion.akkaHttp
-val lagomVersion = "1.4.11"
-val jjwtVersion = "0.10.6"
-val slickVersion = "3.3.2"
-
 scalaVersion in ThisBuild := "2.12.10"
 
 lazy val server = Project("server", base = file("server"))
@@ -15,21 +7,20 @@ lazy val server = Project("server", base = file("server"))
     resolvers += Resolver.bintrayRepo("choffmeister", "maven"),
     libraryDependencies ++= Seq(
       microserviceUtils,
-      microserviceUtilsApis,
       microserviceUtilsTestkit % Test,
       "ch.qos.logback" % "logback-classic" % "1.2.3",
-      "com.github.tminglei" %% "slick-pg" % "0.18.0",
-      "com.github.tminglei" %% "slick-pg_play-json" % "0.18.0",
+      "com.github.tminglei" %% "slick-pg" % Versions.slickPgVersion,
+      "com.github.tminglei" %% "slick-pg_play-json" % Versions.slickPgVersion,
       "com.softwaremill.macwire" %% "macros" % Versions.macwireVersion % Provided,
       "com.typesafe.akka" %% "akka-slf4j" % Versions.akkaVersion,
-      "com.typesafe.slick" %% "slick" % slickVersion,
-      "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
+      "com.typesafe.slick" %% "slick" % Versions.slickVersion,
+      "com.typesafe.slick" %% "slick-hikaricp" % Versions.slickVersion,
       "commons-codec" % "commons-codec" % "1.13",
-      "de.heikoseeberger" %% "akka-http-play-json" % "1.22.0",
+      "de.heikoseeberger" %% "akka-http-play-json" % Versions.akkaHttpPlayJsonVersion,
       "io.jsonwebtoken" % "jjwt-api" % Versions.jjwtVersion,
       "io.jsonwebtoken" % "jjwt-impl" % Versions.jjwtVersion % Runtime,
       "io.jsonwebtoken" % "jjwt-jackson" % Versions.jjwtVersion % Runtime,
-      "org.postgresql" % "postgresql" % "42.2.5",
+      "org.postgresql" % "postgresql" % Versions.postgresqlVersion,
       "org.apache.mina" % "mina-core" % "2.1.3",
       "org.apache.ftpserver" % "ftplet-api" % "1.1.1",
       "org.apache.ftpserver" % "ftpserver-core" % "1.1.1"

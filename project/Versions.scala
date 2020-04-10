@@ -1,11 +1,14 @@
 import de.choffmeister.microserviceutils.plugin.MicroserviceUtilsPluginVersion
 
 object Versions {
-  val airfocusServiceCommonVersion = "1.0.0-rc1"
-  val akkaHttpVersion = MicroserviceUtilsPluginVersion.akkaHttp
   val akkaVersion = MicroserviceUtilsPluginVersion.akka
+  val akkaHttpVersion = MicroserviceUtilsPluginVersion.akkaHttp
+  val akkaHttpPlayJsonVersion = MicroserviceUtilsPluginVersion.akkaHttpPlayJson
   val jjwtVersion = MicroserviceUtilsPluginVersion.jjwt
   val macwireVersion = "2.3.3"
   val playJsonVersion = MicroserviceUtilsPluginVersion.playJson
-  val scalatestVersion = "3.0.8"
+  val postgresqlVersion = MicroserviceUtilsPluginVersion.postgresql
+  val scalatestVersion = "3.1.1"
+  val slickVersion = MicroserviceUtilsPluginVersion.slick
+  val slickPgVersion = MicroserviceUtilsPluginVersion.slickPg
 }

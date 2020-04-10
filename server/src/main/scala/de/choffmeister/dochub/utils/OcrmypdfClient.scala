@@ -4,7 +4,6 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
-import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.config.Config
@@ -15,7 +14,7 @@ import scala.util.control.NoStackTrace
 
 final case class OcrmypdfError(message: String) extends RuntimeException(message) with NoStackTrace
 
-class OcrmypdfClient(url: Uri)(implicit sys: ActorSystem, mat: Materializer, ec: ExecutionContext) {
+class OcrmypdfClient(url: Uri)(implicit sys: ActorSystem, ec: ExecutionContext) {
   def apply(bytes: Source[ByteString, NotUsed], size: Long): Source[ByteString, NotUsed] = {
     val request = HttpRequest(
       method = HttpMethods.POST,
@@ -36,8 +35,8 @@ class OcrmypdfClient(url: Uri)(implicit sys: ActorSystem, mat: Materializer, ec:
 }
 
 object OcrmypdfClient {
-  def fromConfig(config: Config, sys: ActorSystem, mat: Materializer, ec: ExecutionContext): OcrmypdfClient = {
+  def fromConfig(config: Config, sys: ActorSystem, ec: ExecutionContext): OcrmypdfClient = {
     val url = Uri(config.getString("ocrmypdf.url"))
-    new OcrmypdfClient(url)(sys, mat, ec)
+    new OcrmypdfClient(url)(sys, ec)
   }
 }

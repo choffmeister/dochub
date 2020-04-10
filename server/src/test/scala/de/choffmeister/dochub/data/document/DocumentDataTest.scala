@@ -8,39 +8,37 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import de.choffmeister.dochub.data.ExtendedPostgresProfile
 import de.choffmeister.dochub.data.document.HashAlgorithm.{MD5, SHA1, Unknown}
-import de.choffmeister.dochub.data.user.UserData
+import de.choffmeister.dochub.data.user.UserId
 import de.choffmeister.dochub.{AkkaTestKit, DatabaseTest}
 import org.apache.commons.codec.binary.Hex
 
 class DocumentDataTest extends AkkaTestKit {
   def prepare(db: ExtendedPostgresProfile#Backend#Database) = {
     val basePath = Files.createTempDirectory("dochub")
-    val userData = new UserData(db)
     val documentData = new DocumentData(db, basePath)
-    val user = userData.updateUser("github:u1", None, "u1", Set.empty).futureValue
-    (basePath, userData, documentData, user)
+    (basePath, documentData, UserId.empty)
   }
 
   "creates/updates documents" in DatabaseTest { db =>
-    val (_, _, documentData, user) = prepare(db)
+    val (_, documentData, userId) = prepare(db)
     val blob = Source.empty.runWith(documentData.putBlob()).futureValue
     val doc1a =
       documentData
-        .createDocument(user.id, "test", Set.empty, blob.id, ContentTypes.`application/octet-stream`)
+        .createDocument(userId, "test", Set.empty, blob.id, ContentTypes.`application/octet-stream`)
         .futureValue
     val doc1b =
-      documentData.updateDocument(user.id, doc1a.id, blob.id, ContentTypes.`application/octet-stream`).futureValue
+      documentData.updateDocument(userId, doc1a.id, blob.id, ContentTypes.`application/octet-stream`).futureValue
     val doc2a =
       documentData
-        .createDocument(user.id, "test", Set.empty, blob.id, ContentTypes.`application/octet-stream`)
+        .createDocument(userId, "test", Set.empty, blob.id, ContentTypes.`application/octet-stream`)
         .futureValue
 
-    val docs = documentData.listDocuments(user.id)((0, Int.MaxValue)).futureValue._1
+    val docs = documentData.listDocuments(userId)((0, Int.MaxValue)).futureValue._1
     docs.map(d => (d.id, d.revisionNumber)).toSet should be(Set((doc1a.id, 2), (doc2a.id, 1)))
   }
 
   "writes/reads blobs" in DatabaseTest { db =>
-    val (_, _, documentData, _) = prepare(db)
+    val (_, documentData, _) = prepare(db)
 
     def test(key: String, bytes: ByteString, source: Source[ByteString, NotUsed]) = {
       val blob1 = source.runWith(documentData.putBlob()).futureValue
@@ -57,7 +55,7 @@ class DocumentDataTest extends AkkaTestKit {
   }
 
   "writes blobs chunked " in DatabaseTest { db =>
-    val (_, _, documentData, _) = prepare(db)
+    val (_, documentData, _) = prepare(db)
 
     def test(key: String, chunks: (ByteString, Source[ByteString, NotUsed])*) = {
       val id = documentData.putBlobStart().futureValue
@@ -80,7 +78,7 @@ class DocumentDataTest extends AkkaTestKit {
   }
 
   "hashes blobs" in DatabaseTest { db =>
-    val (_, _, documentData, _) = prepare(db)
+    val (_, documentData, _) = prepare(db)
 
     val bytes1 = Source.empty[ByteString]
     val blob1 = bytes1.runWith(documentData.putBlob()).futureValue
@@ -114,7 +112,7 @@ class DocumentDataTest extends AkkaTestKit {
   }
 
   "cancels blobs if hash verification fails" in DatabaseTest { db =>
-    val (_, _, documentData, _) = prepare(db)
+    val (_, documentData, _) = prepare(db)
 
     val bytes1 = Source.single(ByteString("test1"))
     val bytes2 = Source.single(ByteString("test2"))

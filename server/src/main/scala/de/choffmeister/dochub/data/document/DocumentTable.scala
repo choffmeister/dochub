@@ -5,7 +5,7 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.{ContentType, ContentTypes}
 import de.choffmeister.dochub.data.ExtendedPostgresProfile.api._
-import de.choffmeister.dochub.data.user.{UserId, userTableQuery}
+import de.choffmeister.dochub.data.user.UserId
 import de.choffmeister.dochub.utils.JsonHelpers
 import play.api.libs.json.{Format, Json, OFormat}
 import slick.lifted.CanBeQueryCondition
@@ -23,8 +23,8 @@ private[data] class DocumentTable(tag: Tag) extends Table[Document](tag, "docume
   def contentType = column[ContentType]("content_type")
   def createdAt = column[Instant]("created_at", SqlType("timestamp not null default CURRENT_TIMESTAMP"))
   def updatedAt = column[Instant]("updated_at", SqlType("timestamp not null default CURRENT_TIMESTAMP"))
-  def fkUserId =
-    foreignKey("fk__document__user_id", userId, userTableQuery)(_.id, onDelete = ForeignKeyAction.Cascade)
+//  def fkUserId =
+//    foreignKey("fk__document__user_id", userId, userTableQuery)(_.id, onDelete = ForeignKeyAction.Cascade)
   def fkBlobId =
     foreignKey("fk__document__blob_id", blobId, blobTableQuery)(_.id, onDelete = ForeignKeyAction.Cascade)
   def idxCreatedAt = index("idx__document__created_at", createdAt)

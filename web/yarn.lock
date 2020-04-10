@@ -2,18 +2,12 @@
 # yarn lockfile v1
 
 
-"@airfocusio/react-auth-provider@^0.1.0-rc3":
-  version "0.1.0-rc3"
-  resolved "https://npm.pkg.github.com/download/@airfocusio/react-auth-provider/0.1.0-rc3/aee9433a7be24fd1e3ad568c5f2c00020d49ba6ce844041f8702a1282f1a8072#a37d934a4ea9ddb040c93f89050371f910bdf075"
-  integrity sha1-o32TSk6p3bBAyT+JBQNx+RC98HU=
+"@airfocusio/react-http-provider@^0.3.3":
+  version "0.3.3"
+  resolved "https://npm.pkg.github.com/download/@airfocusio/react-http-provider/0.3.3/e20309125441cfa6ba244f159b69a2858b6acba2a71c07830cae9c055fc2b976#369f7879e08e35cc3ab670024502484b670d741e"
+  integrity sha512-3lascyVJyfnDV3LSnO1icuknpu0r1kWPmqZra6QG1Juku1/AnJ33bJTTyfmyCzVgXz3sFkCjnWE6/XSx70LfXg==
   dependencies:
-    jwt-decode "^2.2.0"
-    query-string "^6.8.2"
-
-"@airfocusio/react-http-provider@^0.1.0-rc6":
-  version "0.1.0-rc6"
-  resolved "https://npm.pkg.github.com/download/@airfocusio/react-http-provider/0.1.0-rc6/b18030aa6d78f80d5931e82224e264f3e307e5af4f5816088f5117e8e21b652b#8c3def52273b6a99e41ef4d7bcd7c8c991430ff5"
-  integrity sha512-EU5qPJgm6lL3mTc0dTe5jh8P7kaQH/8CwO4kFhMy93f8UJ/Bm/yAlsP5GEjfVl8Nx8wOqZoU6hdy4tqU2ADJnw==
+    js-sha1 "^0.6.0"
 
 "@babel/code-frame@7.8.3", "@babel/code-frame@^7.8.3":
   version "7.8.3"
@@ -7212,6 +7206,11 @@ js-levenshtein@^1.1.3:
   resolved "https://registry.yarnpkg.com/js-levenshtein/-/js-levenshtein-1.1.6.tgz#c6cee58eb3550372df8deb85fad5ce66ce01d59d"
   integrity sha512-X2BB11YZtrRqY4EnQcLX5Rh373zbK4alC1FW7D7MBhL2gtcC17cTnr6DmfHZeS0s2rTHjUTMMHfG7gO8SSdw+g==
 
+js-sha1@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/js-sha1/-/js-sha1-0.6.0.tgz#adbee10f0e8e18aa07cdea807cf08e9183dbc7f9"
+  integrity sha512-01gwBFreYydzmU9BmZxpVk6svJJHrVxEN3IOiGl6VO93bVKYETJ0sIth6DASI6mIFdt7NmfX9UiByRzsYHGU9w==
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -7473,11 +7472,6 @@ jsx-ast-utils@^2.2.3:
   dependencies:
     array-includes "^3.0.3"
     object.assign "^4.1.0"
-
-jwt-decode@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-2.2.0.tgz#7d86bd56679f58ce6a84704a657dd392bba81a79"
-  integrity sha1-fYa9VmefWM5qhHBKZX3TkruoGnk=
 
 killable@^1.0.1:
   version "1.0.1"
@@ -9900,15 +9894,6 @@ query-string@^6.12.0:
   version "6.12.0"
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.12.0.tgz#fa0fe5b3ddf4d040d1236b80672949ab33d5cf80"
   integrity sha512-aoiFW9ZU7jP8Itjqfpw80Qe7RoyCIhFrW522sdsp9LG92pat6CCG3d8qNZBaUi71FsEjIfLjx9Ky347FtVoqXA==
-  dependencies:
-    decode-uri-component "^0.2.0"
-    split-on-first "^1.0.0"
-    strict-uri-encode "^2.0.0"
-
-query-string@^6.8.2:
-  version "6.8.3"
-  resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.8.3.tgz#fd9fb7ffb068b79062b43383685611ee47777d4b"
-  integrity sha512-llcxWccnyaWlODe7A9hRjkvdCKamEKTh+wH8ITdTc3OhchaqUZteiSCX/2ablWHVrkVIe04dntnaZJ7BdyW0lQ==
   dependencies:
     decode-uri-component "^0.2.0"
     split-on-first "^1.0.0"

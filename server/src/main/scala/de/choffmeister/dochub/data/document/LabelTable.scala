@@ -3,7 +3,7 @@ package de.choffmeister.dochub.data.document
 import java.util.UUID
 
 import de.choffmeister.dochub.data.ExtendedPostgresProfile.api._
-import de.choffmeister.dochub.data.user.{UserId, userTableQuery}
+import de.choffmeister.dochub.data.user.UserId
 import org.apache.commons.codec.binary.Hex
 import play.api.libs.json._
 import slick.lifted.CanBeQueryCondition
@@ -16,8 +16,8 @@ private[data] class LabelTable(tag: Tag) extends Table[Label](tag, "labels") {
   def userId = column[UserId]("user_id")
   def name = column[String]("name")
   def color = column[Color]("color")
-  def fkUserId =
-    foreignKey("fk__label__user_id", userId, userTableQuery)(_.id, onDelete = ForeignKeyAction.Cascade)
+//  def fkUserId =
+//    foreignKey("fk__label__user_id", userId, userTableQuery)(_.id, onDelete = ForeignKeyAction.Cascade)
   def idxName = index("idx__label__name", name)
   def * = (id, userId, name, color) <> ((Label.apply _).tupled, Label.unapply)
 }

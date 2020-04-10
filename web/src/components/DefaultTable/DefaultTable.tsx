@@ -1,6 +1,6 @@
 import React from 'react'
 import makeStyles from '@material-ui/core/styles/makeStyles'
-import { useDynamicHttpCall } from '@airfocusio/react-http-provider'
+import { useHttpCall } from '@airfocusio/react-http-provider'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
@@ -35,7 +35,7 @@ export function DefaultTable<R extends { id: string }, E>({
   const styles = useStyles()
   const [pageIndex, setPageIndex] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(25)
-  const page = useDynamicHttpCall(data, pageIndex * rowsPerPage, rowsPerPage)
+  const page = useHttpCall(data, pageIndex * rowsPerPage, rowsPerPage)
   const [selected, setSelected] = React.useState<string[]>([])
   return page ? (
     <React.Fragment>

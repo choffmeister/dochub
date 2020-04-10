@@ -1,23 +1,28 @@
 package de.choffmeister.dochub.data.document
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.testkit.TestKit
 import akka.util.ByteString
 import org.apache.commons.codec.binary.Hex
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.ExecutionContext
 
-class HashTest extends TestKit(ActorSystem()) with WordSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
+class HashTest
+    extends TestKit(ActorSystem())
+    with AnyWordSpecLike
+    with BeforeAndAfterAll
+    with Matchers
+    with ScalaFutures {
   implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(15, Seconds), interval = Span(10, Millis))
 
   implicit val executor = ExecutionContext.Implicits.global
-  implicit val materializer = ActorMaterializer()
 
   "single" in {
     def check(bytes: Source[ByteString, _], algorithm: HashAlgorithm, expected: String) = {

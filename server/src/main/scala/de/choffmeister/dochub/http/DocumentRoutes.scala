@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.headers.{ContentDispositionTypes, `Content-Dispo
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
-import de.choffmeister.dochub.auth.AuthProvider
+import de.choffmeister.dochub.auth.AuthConsumer
 import de.choffmeister.dochub.data.document._
 import de.choffmeister.dochub.http.HalProtocol._
 import de.choffmeister.dochub.utils.AkkaHttpHelpers._
@@ -15,19 +15,19 @@ import de.choffmeister.dochub.utils.OcrmypdfClient
 
 import scala.concurrent.ExecutionContext
 
-class DocumentRoutes(authProvider: AuthProvider, documentData: DocumentData, ocrmypdfClient: OcrmypdfClient)(
-  implicit val system: ActorSystem,
-  val executionContext: ExecutionContext,
-  val materializer: Materializer
-) extends RoutesGroup {
+class DocumentRoutes(authConsumer: AuthConsumer, documentData: DocumentData, ocrmypdfClient: OcrmypdfClient)(
+  implicit system: ActorSystem,
+  executionContext: ExecutionContext,
+  materializer: Materializer
+) extends HttpServerRoutes {
   def searchDocumentsRoute: Route =
     (path("api" / "documents" / "search") & paging() & get) { page =>
       parameter("query") { query =>
-        authProvider.authenticateWeb() { principal =>
+        authConsumer.authenticate { userId =>
           val future = for {
-            (documents, totalCount) <- documentData.searchDocuments(principal.userId, query)(page)
+            (documents, totalCount) <- documentData.searchDocuments(userId, query)(page)
             labelIds = documents.foldLeft(Set.empty[LabelId])(_ ++ _.labelIds)
-            labels <- documentData.retrieveLabels(principal.userId, labelIds)
+            labels <- documentData.retrieveLabels(userId, labelIds)
           } yield (documents, totalCount, labels)
           onSuccess(future) {
             case (documents, totalCount, labels) =>
@@ -41,11 +41,11 @@ class DocumentRoutes(authProvider: AuthProvider, documentData: DocumentData, ocr
 
   def listDocumentsRoute: Route =
     (path("api" / "documents") & paging() & get) { page =>
-      authProvider.authenticateWeb() { principal =>
+      authConsumer.authenticate { userId =>
         val future = for {
-          (documents, totalCount) <- documentData.listDocuments(principal.userId)(page)
+          (documents, totalCount) <- documentData.listDocuments(userId)(page)
           labelIds = documents.foldLeft(Set.empty[LabelId])(_ ++ _.labelIds)
-          labels <- documentData.retrieveLabels(principal.userId, labelIds)
+          labels <- documentData.retrieveLabels(userId, labelIds)
         } yield (documents, totalCount, labels)
         onSuccess(future) {
           case (documents, totalCount, labels) =>
@@ -58,11 +58,11 @@ class DocumentRoutes(authProvider: AuthProvider, documentData: DocumentData, ocr
 
   def retrieveDocumentRoute: Route =
     (path("api" / "documents" / JavaUUID.map(DocumentId.apply)) & get) { documentId =>
-      authProvider.authenticateWeb() { principal =>
+      authConsumer.authenticate { userId =>
         val future = for {
-          document <- documentData.retrieveDocument(principal.userId, documentId)
+          document <- documentData.retrieveDocument(userId, documentId)
           labelIds = document.map(_.labelIds).getOrElse(Set.empty)
-          labels <- documentData.retrieveLabels(principal.userId, labelIds)
+          labels <- documentData.retrieveLabels(userId, labelIds)
         } yield (document, labels)
         onSuccess(future) {
           case (Some(document), labels) => complete(document.embed("labels", labels.map(l => l.id.toString -> l).toMap))
@@ -74,12 +74,12 @@ class DocumentRoutes(authProvider: AuthProvider, documentData: DocumentData, ocr
   def createDocumentRoute: Route =
     (path("api" / "documents") & post) {
       parameter("name") { name =>
-        authProvider.authenticateWeb() { principal =>
+        authConsumer.authenticate { userId =>
           (extractRequestEntity & extractContentType(name)) {
             case (entity, contentType) =>
               val future = for {
                 blob <- entity.dataBytes.runWith(documentData.putBlob())
-                document <- documentData.createDocument(principal.userId, name, Set.empty, blob.id, contentType)
+                document <- documentData.createDocument(userId, name, Set.empty, blob.id, contentType)
               } yield document
               onSuccess(future) { document =>
                 complete(document.embed("labels", Map.empty[String, LabelId]))
@@ -92,13 +92,13 @@ class DocumentRoutes(authProvider: AuthProvider, documentData: DocumentData, ocr
   def updateDocumentRoute: Route =
     (path("api" / "documents" / JavaUUID.map(DocumentId.apply)) & post) { documentId =>
       parameter("name") { name =>
-        authProvider.authenticateWeb() { principal =>
+        authConsumer.authenticate { userId =>
           (extractRequestEntity & extractContentType(name)) {
             case (entity, contentType) =>
               val future = for {
                 blob <- entity.dataBytes.runWith(documentData.putBlob())
-                document <- documentData.updateDocument(principal.userId, documentId, blob.id, contentType)
-                labels <- documentData.retrieveLabels(principal.userId, document.labelIds)
+                document <- documentData.updateDocument(userId, documentId, blob.id, contentType)
+                labels <- documentData.retrieveLabels(userId, document.labelIds)
               } yield (document, labels)
               onSuccess(future) {
                 case (document, labels) =>
@@ -112,8 +112,8 @@ class DocumentRoutes(authProvider: AuthProvider, documentData: DocumentData, ocr
   def downloadDocumentRoute: Route =
     (path("api" / "documents" / JavaUUID.map(DocumentId.apply) / IntNumber / "download") & get) {
       case (documentId, revisionNumber) =>
-        authProvider.authenticateWeb() { principal =>
-          onSuccess(documentData.retrieveRevision(principal.userId, documentId, revisionNumber)) {
+        authConsumer.authenticate { userId =>
+          onSuccess(documentData.retrieveRevision(userId, documentId, revisionNumber)) {
             case Some((document, revision, blob, bytes)) =>
               val header = `Content-Disposition`(ContentDispositionTypes.inline, Map("filename" -> document.name))
               respondWithHeader(header) {
@@ -127,8 +127,8 @@ class DocumentRoutes(authProvider: AuthProvider, documentData: DocumentData, ocr
 
   def ocrDocumentRoute: Route =
     (path("api" / "documents" / JavaUUID.map(DocumentId.apply) / "ocr") & post) { documentId =>
-      authProvider.authenticateWeb() { principal =>
-        onSuccess(documentData.retrieveDocument(principal.userId, documentId)) {
+      authConsumer.authenticate { userId =>
+        onSuccess(documentData.retrieveDocument(userId, documentId)) {
           case Some(document) =>
             onSuccess(documentData.retrieveRevision(document.userId, document.id, document.revisionNumber)) {
               case Some((document, _, blob, bytes)) =>
